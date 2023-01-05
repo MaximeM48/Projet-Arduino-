@@ -1,6 +1,7 @@
 Vidéo du système de suspension: https://youtu.be/oI-WJqhaRsM
 
-#Pièces: 
+#Pièces: #
+
 -Tirant supérieur de suspension: https://www.breizh-modelisme.com/piece-ftx-carnage-5538-5537-charbon/21435349-tirant-superieur-de-suspension-arriere-x2-ftx-carnage-ftx6328.html
 
 -Fusée arrière: https://www.breizh-modelisme.com/piece-ftx-carnage-5538-5537-charbon/18503003-2-portes-fusees-arriere-ftx-carnage-vantage-ftx6217.html?gclid=Cj0KCQiAnsqdBhCGARIsAAyjYjRqxUoSQQ3woE8FKf7jnvFr6cBa2_U3RtC3Xqn2xQ309h05LB2aAPYaAoC1EALw_wcB
