@@ -1,6 +1,6 @@
 Vidéo du système de suspension: https://youtu.be/oI-WJqhaRsM
 
-#Pièces: #
+Pièces: 
 
 -Tirant supérieur de suspension: https://www.breizh-modelisme.com/piece-ftx-carnage-5538-5537-charbon/21435349-tirant-superieur-de-suspension-arriere-x2-ftx-carnage-ftx6328.html
 
