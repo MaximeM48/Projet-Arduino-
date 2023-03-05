@@ -1,6 +1,7 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
 Servo servo1;
+Servo servo2;
 //SoftwareSerial Serial(1, 0); // HC-12 TX Pin, HC-12 RX Pin
 int tension_num=0;//variable pour le servomoteur direction
 unsigned int lecture_echo=0;//varialble pour capteur
@@ -13,7 +14,8 @@ const int IN2=8;//variable pour moteur voiture
 const int ENB=10;//variable pour moteur voiture
 const int IN3=12;//variable pour moteur voiture
 const int IN4=13;//variable pour moteur voiture
-int sec=3;//Temps pendant lequel le moteur tournera(en demi-secondes
+int sec=5;//Temps pendant lequel le moteur tournera(en demi-secondes
+int sec2=2;
 int valManettePos=0;//variable pour moteur voiture
 char msg;//variable pour la manette
 int x=-1;//variable pour la manette
@@ -24,6 +26,9 @@ int infos[4]= {127,129,0,1};//variable pour la manette
 const int e=1;
 unsigned long timer;
 int statut=1; //1 correspond à la position basse de la voiture, 0 la position haute
+int statut2=0; //0 correspond à l'aileron plat, 1 correspond à l'aileron incliné
+int ledAvant=2;//pin phares avants
+int ledArriere=3;//pin phares arrières
 
 void setup() {
   pinMode(ENA,OUTPUT);
@@ -41,12 +46,13 @@ void setup() {
   digitalWrite(IN4,HIGH);
   pinMode(trig,OUTPUT);
   pinMode(echo,INPUT);
-  pinMode(2,OUTPUT);
-  pinMode(3,OUTPUT);
-  digitalWrite(2,HIGH);
-  digitalWrite(3,HIGH);
+  pinMode(ledAvant,OUTPUT);
+  pinMode(ledArriere,OUTPUT);
+  digitalWrite(ledAvant,HIGH);
+  digitalWrite(ledArriere,HIGH);
   timer=millis();
   servo1.attach(5);
+  servo2.attach(11);
   Serial.begin(9600);
   delay(500);
 }
@@ -54,43 +60,46 @@ void setup() {
 void loop() {
   ecouter();
   if(infos[2]==1){
-    digitalWrite(2,HIGH);
+    digitalWrite(ledAvant,HIGH);
   }
   else{
-    digitalWrite(2,LOW);
-    
+    digitalWrite(ledAvant,LOW);
   }
   
   if(infos[3]==1){
+    servoAileron(0);
     if(statut!=1){
-      if(digitalRead(ENB)==LOW){
-        moteurSuspensions();
-      }
+      moteurSuspensions();
     }
   }
   else if(infos[3]==2){
+    servoAileron(0);
     if(statut!=0){
-      if(digitalRead(ENB)==LOW){
-        moteurSuspensions();
-      }
+      moteurSuspensions();
     }
   }
   else{
+    servoAileron(1);
     if(statut!=0){
-      if(digitalRead(ENB)==LOW){
-        moteurSuspensions();
-      }
+      moteurSuspensions();
     }
   }
   servoDirection(infos[0]);
   if (capteur(6,4)==1){
-    moteurVoiture(129);
+    if(infos[1]<129+e){
+      moteurVoiture(infos[1]);
+    }
+    else{
+      moteurVoiture(129);
+    }
   }
   else{
     moteurVoiture(infos[1]);
   }
-}
+  analogWrite(ledArriere,infos[1]);//les feux de freinages s'allument progressivement de façon inversement proportionnelle de la vitesse
+} //fin du main
 
+//fonctions
 int capteur(int a,int b){
   digitalWrite(a,HIGH);
   delayMicroseconds(10);
@@ -105,44 +114,47 @@ int capteur(int a,int b){
   } 
 }
 
-int moteurVoiture(int valeur){
+void moteurVoiture(int valeur){
   if(valeur>129+e){
     valManettePos=map(valeur,129,254,0,255);
     digitalWrite(IN3,HIGH);
     digitalWrite(IN4,LOW);
     analogWrite(ENB,valManettePos);
-    return 1;
   }
   else if(valeur<129-e){
     valManettePos=map(valeur,129,0,0,255);
     digitalWrite(IN3,LOW);
     digitalWrite(IN4,HIGH);
     analogWrite(ENB,valManettePos);
-    return 1;
   }
   else{
     digitalWrite(IN3,HIGH);
     digitalWrite(IN4,LOW);
     analogWrite(ENB,0);
-    return 0;
   }
 }
 
 void moteurSuspensions(){
-  int sec=3;//Temps pendant lequel le moteur tournera(en demi-secondes)
-  while(sec>0){
-    if (millis() - timer > 500) {
-        timer = millis();
-        sec = sec - 1;}
-    if(statut==0){
+  int sec=5;//Temps pendant lequel le moteur tournera(en demi-secondes)
+  int sec2=2;
+  if(statut==1){
+    while(sec>0){
+      if (millis() - timer > 500) {
+          timer = millis();
+          sec = sec - 1;}
       digitalWrite(IN1,LOW);
       digitalWrite(IN2,HIGH);
       analogWrite(ENA,255);
     }
-    else{
-      digitalWrite(IN1,HIGH);
-      digitalWrite(IN2,LOW);
-      digitalWrite(ENA,255);
+  }
+  else{
+    while(sec2>0){
+      if (millis() - timer > 500) {
+          timer = millis();
+          sec2 = sec2 - 1;}
+    digitalWrite(IN1,HIGH);
+    digitalWrite(IN2,LOW);
+    digitalWrite(ENA,255);
     }
   }
   if(statut==0){
@@ -154,13 +166,24 @@ void moteurSuspensions(){
 }
 
 int servoDirection(int valeur){
-  tension_num=map(valeur,0,254,180,0);
+  tension_num=map(valeur,0,254,0,180);
   servo1.write(tension_num);
   if (tension_num>90){
     return 0;
   }
   else{
     return 1;
+  }
+}
+
+void servoAileron(int valeur){
+  if(valeur==0){
+    servo2.write(90);
+    statut2=0;
+  }
+  if(valeur==1){
+    servo2.write(160);
+    statut2=1;
   }
 }
 
